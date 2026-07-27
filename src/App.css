@@ -48,8 +48,8 @@ body {
 /* ========== App Layout ========== */
 .App {
   min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
 }
 
@@ -62,11 +62,36 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-md);
+  transition: padding 0.25s ease, box-shadow 0.25s ease;
+}
+
+.app-header.header-compact {
+  padding: 10px 20px;
+  box-shadow: var(--shadow-lg);
+}
+
+.app-header.header-compact .header-content {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, max-height 0.25s ease, margin 0.25s ease;
+}
+
+.app-header.header-compact .search-bar {
+  margin-bottom: 0;
+  max-width: 600px;
+}
+
+.app-header.header-compact .filter-bar {
+  display: none;
 }
 
 .header-content {
   text-align: center;
   margin-bottom: 16px;
+  transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.25s ease;
 }
 
 .app-title {
@@ -208,7 +233,7 @@ body {
 /* ========== Main Content ========== */
 .app-main {
   padding: 16px;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 

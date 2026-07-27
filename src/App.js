@@ -288,6 +288,7 @@ function App() {
   const [selectedMethod, setSelectedMethod] = useState('all');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showOdeGuide, setShowOdeGuide] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
@@ -317,9 +318,19 @@ function App() {
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
   
+  // Scroll-based header collapse
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   return (
     <div className="App">
-      <header className="app-header">
+      <header className={`app-header${isScrolled ? ' header-compact' : ''}`}>
         <div className="header-content">
           <h1 className="app-title">
             <span className="title-icon">☕</span>
