@@ -275,6 +275,8 @@ function App() {
   const [recipes] = useState(() => {
     const seen = new Map();
     [...recipesData].sort((a, b) => (b.saved_count || 0) - (a.saved_count || 0)).forEach(r => {
+      const saved = r.saved_count || 0;
+      if (saved < 10) return;
       if (r.recipe_slug && !seen.has(r.recipe_slug)) {
         seen.set(r.recipe_slug, r);
       }
