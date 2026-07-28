@@ -57,70 +57,18 @@ body {
 .app-header {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: var(--color-white);
-  padding: 24px 20px 20px;
+  padding: 12px 16px 12px;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-md);
-  transition: padding 0.25s ease, box-shadow 0.25s ease;
-}
-
-.app-header.header-compact {
-  padding: 10px 20px;
-  box-shadow: var(--shadow-lg);
-}
-
-.app-header.header-compact .header-content {
-  opacity: 0;
-  max-height: 0;
-  margin: 0;
-  overflow: hidden;
-  pointer-events: none;
-  transition: opacity 0.2s ease, max-height 0.25s ease, margin 0.25s ease;
-}
-
-.app-header.header-compact .search-bar {
-  margin-bottom: 0;
-  max-width: 600px;
-}
-
-.app-header.header-compact .filter-bar {
-  display: none;
-}
-
-.header-content {
-  text-align: center;
-  margin-bottom: 16px;
-  transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.25s ease;
-}
-
-.app-title {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.title-icon {
-  font-size: 30px;
-}
-
-.app-subtitle {
-  font-size: 14px;
-  opacity: 0.8;
-  margin-top: 2px;
-  font-weight: 400;
 }
 
 /* ========== Search Bar ========== */
 .search-bar {
   position: relative;
   max-width: 500px;
-  margin: 0 auto 12px;
+  margin: 0 auto 8px;
 }
 
 .search-icon {
@@ -134,12 +82,12 @@ body {
 
 .search-input {
   width: 100%;
-  padding: 12px 42px 12px 42px;
+  padding: 10px 38px 10px 38px;
   border: 2px solid transparent;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.15);
   color: var(--color-white);
-  font-size: 15px;
+  font-size: 14px;
   font-family: var(--font-sans);
   outline: none;
   transition: var(--transition);
@@ -211,6 +159,38 @@ body {
   border-color: var(--color-accent);
   color: var(--color-primary);
   font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .filter-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .filter-select {
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
+    max-width: 90px;
+    background-position: right 8px center;
+  }
+
+  .ode-guide-header-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .filter-bar {
+    gap: 4px;
+  }
+
+  .search-input {
+    padding: 8px 34px 8px 34px;
+    font-size: 13px;
+  }
+
+  .app-header {
+    padding: 8px 10px 8px;
+  }
 }
 
 .toggle-filters-btn {

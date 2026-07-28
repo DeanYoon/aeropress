@@ -311,7 +311,6 @@ function App() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showOdeGuide, setShowOdeGuide] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [brewRecipe, setBrewRecipe] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   
@@ -355,25 +354,10 @@ function App() {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
-  
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
+
   return (
     <div className="App">
-      <header className={`app-header${isScrolled ? ' header-compact' : ''}`}>
-        <div className="header-content">
-          <h1 className="app-title">
-            <span className="title-icon">☕</span>
-            AeroPrecipe
-          </h1>
-          <p className="app-subtitle">Browse {recipes.length} AeroPress recipes</p>
-        </div>
-        
+      <header className="app-header">        
         <div className="search-bar">
           <span className="search-icon">🔍</span>
           <input
