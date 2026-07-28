@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import recipesData from './data/recipes.json';
+import BrewPopup from './BrewPopup';
+import HistoryPage from './HistoryPage';
 import './App.css';
 
 // ========== Fellow Ode Gen 2 Conversion ==========
@@ -17,15 +19,12 @@ function getOdeSetting(grindLevel, clicks) {
     const c = parseInt(clicks, 10);
     if (!isNaN(c)) {
       for (const range of ODE_RANGES) {
-        if (c >= range.min && c <= range.max) {
-          return range.ode;
-        }
+        if (c >= range.min && c <= range.max) return range.ode;
       }
       if (c < 8) return '2.1 ~ 3';
       if (c > 40) return '7 ~ 8';
     }
   }
-  
   if (grindLevel) {
     const gl = grindLevel.toLowerCase();
     if (gl.includes('espresso') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) return '3 ~ 3.1';
@@ -35,7 +34,6 @@ function getOdeSetting(grindLevel, clicks) {
     if (gl.includes('medium')) return '4 ~ 5';
     if (gl.includes('fine')) return '3.1 ~ 4';
   }
-  
   return null;
 }
 
@@ -49,7 +47,7 @@ const FULL_CONVERSION = [
 
 // ========== Components ==========
 
-function RecipeCard({ recipe, onClick }) {
+function RecipeCard({ recipe, onClick, onBrew }) {
   const { recipeTitle, RecipeCreator, brewMethod, duration, temperature, weight, waterLevel, saved_count, category, tags, coffeeType, grindLevel } = recipe;
   
   const isCold = tags?.includes('Cold') || category?.some(c => c.toLowerCase().includes('ice')) || recipe.isCold;
@@ -94,11 +92,15 @@ function RecipeCard({ recipe, onClick }) {
         {isCold && <span className="tag cold">Iced</span>}
         {saved_count && <span className="tag saves">❤️ {saved_count}</span>}
       </div>
+      
+      <button className="card-brew-btn" onClick={(e) => { e.stopPropagation(); onBrew(recipe); }}>
+        ▶ Brew This Recipe
+      </button>
     </article>
   );
 }
 
-function RecipeDetail({ recipe, onClose, odeGuideOpen }) {
+function RecipeDetail({ recipe, onClose, odeGuideOpen, onBrew }) {
   const { 
     recipeTitle, RecipeCreator, brewMethod, brewCategory,
     duration, temperature, weight, waterLevel, coffeeType, grindLevel,
@@ -251,6 +253,12 @@ function RecipeDetail({ recipe, onClose, odeGuideOpen }) {
             </section>
           )}
           
+          <div className="detail-brew-cta">
+            <button className="detail-brew-btn" onClick={(e) => { e.stopPropagation(); onBrew(recipe); }}>
+              ▶ Start Brew with This Recipe
+            </button>
+          </div>
+          
           <div className="detail-footer">
             {saved_count > 0 && <span className="footer-stat">❤️ Saved {saved_count} times</span>}
             {credit && <span className="footer-credit">Credits: {credit}</span>}
@@ -289,6 +297,8 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showOdeGuide, setShowOdeGuide] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [brewRecipe, setBrewRecipe] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
   
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
@@ -299,9 +309,7 @@ function App() {
         const creator = (r.RecipeCreator || '').toLowerCase();
         const tags = Array.isArray(r.tags) ? r.tags.join(' ').toLowerCase() : '';
         const catText = Array.isArray(r.category) ? r.category.join(' ').toLowerCase() : (r.category || '').toLowerCase();
-        if (!title.includes(q) && !creator.includes(q) && !tags.includes(q) && !catText.includes(q)) {
-          return false;
-        }
+        if (!title.includes(q) && !creator.includes(q) && !tags.includes(q) && !catText.includes(q)) return false;
       }
       return true;
     });
@@ -312,17 +320,16 @@ function App() {
       if (e.key === 'Escape') {
         setSelectedRecipe(null);
         setShowOdeGuide(false);
+        setBrewRecipe(null);
+        setShowHistory(false);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
   
-  // Scroll-based header collapse
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
@@ -366,15 +373,25 @@ function App() {
             ))}
           </div>
           
-          <button 
-            className="ode-guide-header-btn"
-            onClick={() => setShowOdeGuide(true)}
-            title="Fellow Ode Gen 2 Conversion Guide"
-          >
-            ⚙️ Ode
-          </button>
+          <button className="ode-guide-header-btn" onClick={() => setShowOdeGuide(true)}>⚙️ Ode</button>
         </div>
       </header>
+      
+      {/* Navigation tabs */}
+      <nav className="app-nav">
+        <button
+          className={`nav-tab ${!showHistory ? 'active' : ''}`}
+          onClick={() => setShowHistory(false)}
+        >
+          📖 Recipes
+        </button>
+        <button
+          className={`nav-tab ${showHistory ? 'active' : ''}`}
+          onClick={() => setShowHistory(true)}
+        >
+          📋 History
+        </button>
+      </nav>
       
       <main className="app-main">
         {filteredRecipes.length === 0 ? (
@@ -393,10 +410,11 @@ function App() {
             </div>
             <div className="recipes-grid">
               {filteredRecipes.map(recipe => (
-                <RecipeCard 
-                  key={recipe.recipe_slug} 
-                  recipe={recipe} 
-                  onClick={setSelectedRecipe} 
+                <RecipeCard
+                  key={recipe.recipe_slug}
+                  recipe={recipe}
+                  onClick={setSelectedRecipe}
+                  onBrew={setBrewRecipe}
                 />
               ))}
             </div>
@@ -404,16 +422,29 @@ function App() {
         )}
       </main>
       
+      {showHistory && (
+        <HistoryPage onClose={() => setShowHistory(false)} />
+      )}
+      
       {selectedRecipe && (
-        <RecipeDetail 
-          recipe={selectedRecipe} 
-          onClose={() => setSelectedRecipe(null)} 
+        <RecipeDetail
+          recipe={selectedRecipe}
+          onClose={() => setSelectedRecipe(null)}
           odeGuideOpen={() => setShowOdeGuide(true)}
+          onBrew={setBrewRecipe}
         />
       )}
       
       {showOdeGuide && (
         <OdeGuideModalView onClose={() => setShowOdeGuide(false)} />
+      )}
+      
+      {brewRecipe && (
+        <BrewPopup
+          recipe={brewRecipe}
+          onClose={() => setBrewRecipe(null)}
+          onSaved={() => {}}
+        />
       )}
     </div>
   );
@@ -429,7 +460,7 @@ function OdeGuideModalView({ onClose }) {
   return (
     <div className="detail-overlay" onClick={onClose} style={{ zIndex: 300 }}>
       <div className="detail-panel ode-guide-panel" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh' }}>
-        <button className="close-btn" onClick={onClose} aria-label="Close">✕</button>
+        <button className="close-btn" onClick={onClose}>✕</button>
         
         <div className="detail-header" style={{ padding: '24px' }}>
           <h1 className="detail-title" style={{ fontSize: '22px', paddingRight: '36px' }}>

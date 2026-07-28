@@ -985,3 +985,612 @@ body {
     font-size: 28px;
   }
 }
+
+/* ========== Navigation Tabs ========== */
+.app-nav {
+  display: flex;
+  background: var(--color-primary);
+  padding: 0 16px;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.nav-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 3px solid transparent;
+}
+
+.nav-tab.active {
+  color: white;
+  border-bottom-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-tab:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== Card Brew Button ========== */
+.card-brew-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.card-brew-btn:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* ========== Detail Brew CTA ========== */
+.detail-brew-cta {
+  margin: 20px 0;
+}
+
+.detail-brew-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: white;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.detail-brew-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== Brew Popup ========== */
+.brew-panel .detail-body {
+  padding: 20px 24px 28px;
+}
+
+.brew-params-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brew-param-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brew-param-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.brew-param-item input {
+  padding: 10px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-bg);
+  outline: none;
+  transition: var(--transition);
+}
+
+.brew-param-item input:focus {
+  border-color: var(--color-accent);
+  background: white;
+}
+
+.brew-param-full {
+  grid-column: 1 / -1;
+}
+
+.brew-ratio-display {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  padding: 8px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.brew-ratio-display strong {
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.brew-start-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+  color: white;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.brew-start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.brew-start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========== Brew Timer ========== */
+.brew-timer-display {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.brew-timer-label {
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.7;
+  margin-top: 4px;
+  color: white;
+}
+
+.brew-progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.brew-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.brew-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brew-current-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #F5EDE4 0%, #EDE0D0 100%);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+}
+
+.brew-step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.brew-step-text {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-primary);
+  padding-top: 4px;
+  font-weight: 500;
+}
+
+.brew-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brew-step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: var(--transition);
+}
+
+.brew-step-item.active {
+  background: rgba(200, 168, 124, 0.15);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.brew-step-item.done {
+  opacity: 0.5;
+}
+
+.brew-step-item.done .brew-step-dot {
+  background: var(--color-accent);
+  color: white;
+}
+
+.brew-step-dot {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-badge-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.brew-step-item.active .brew-step-dot {
+  background: var(--color-primary);
+  color: white;
+}
+
+.brew-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.brew-pause-btn,
+.brew-finish-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.brew-pause-btn {
+  background: var(--color-badge-bg);
+  color: var(--color-primary);
+}
+
+.brew-pause-btn:hover {
+  background: var(--color-tag-bg);
+}
+
+.brew-finish-btn {
+  background: var(--color-primary);
+  color: white;
+}
+
+.brew-finish-btn:hover {
+  background: var(--color-primary-light);
+}
+
+/* ========== Brew Summary ========== */
+.brew-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.brew-summary-item {
+  padding: 12px;
+  text-align: center;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.brew-summary-item strong {
+  display: block;
+  font-size: 18px;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+
+.brew-save-success {
+  text-align: center;
+  padding: 12px;
+  background: #E8F5E9;
+  border-radius: var(--radius-sm);
+  color: #2E7D32;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.brew-save-error {
+  text-align: center;
+  padding: 12px;
+  background: #FFEBEE;
+  border-radius: var(--radius-sm);
+  color: #C62828;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.brew-done-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brew-close-btn {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.brew-close-btn:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text);
+}
+
+/* ========== History Page ========== */
+.history-panel .detail-body {
+  padding: 16px 20px 24px;
+}
+
+.history-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+.history-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.history-card:hover {
+  border-color: var(--color-accent);
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.history-card-header:hover {
+  background: var(--color-bg);
+}
+
+.history-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.history-card-date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.history-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-rating-badge {
+  font-size: 14px;
+  color: #F5A623;
+}
+
+.history-toggle {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.history-card-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+}
+
+.history-params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.history-params span {
+  padding: 4px 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.history-rating-section {
+  margin-bottom: 12px;
+}
+
+.history-rating-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.star-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  font-size: 28px;
+  cursor: pointer;
+  color: #DDD;
+  transition: var(--transition);
+}
+
+.star.filled {
+  color: #F5A623;
+}
+
+.star:hover {
+  transform: scale(1.2);
+}
+
+.history-notes-section {
+  margin-bottom: 12px;
+}
+
+.history-notes-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.history-notes-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  resize: vertical;
+  outline: none;
+  transition: var(--transition);
+}
+
+.history-notes-input:focus {
+  border-color: var(--color-accent);
+  background: white;
+}
+
+.history-save-notes-btn {
+  margin-top: 6px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: white;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.history-save-notes-btn:hover {
+  background: var(--color-primary-light);
+}
+
+.history-save-notes-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.history-delete-btn {
+  padding: 6px 14px;
+  border: 1px solid #E84A5F;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #E84A5F;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.history-delete-btn:hover {
+  background: #E84A5F;
+  color: white;
+}

@@ -1,0 +1,253 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+const API_BASE = '/api/brews';
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+export default function BrewPopup({ recipe, onClose, onSaved }) {
+  const [phase, setPhase] = useState('config'); // config | brewing | done
+  const [elapsed, setElapsed] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveResult, setSaveResult] = useState(null);
+
+  // Editable params
+  const [params, setParams] = useState({
+    coffeeWeight: recipe.weight || recipe.coffeeWeight || 15,
+    waterAmount: recipe.waterLevel || recipe.waterAmount || 200,
+    temperature: recipe.temperature || 93,
+    duration: recipe.duration || 120,
+    grindSetting: '',
+  });
+
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const elapsedBeforePause = useRef(0);
+
+  const steps = Array.isArray(recipe.steps) && recipe.steps.length > 0
+    ? recipe.steps.map(s => typeof s === 'object' ? (s.text || s.instruction || '') : s)
+    : [
+        'Rinse paper filter & preheat AeroPress',
+        'Add coffee grounds',
+        'Pour water and start timer',
+        'Stir / swirl',
+        'Press',
+        'Dilute & enjoy!',
+      ];
+
+  const stepDuration = params.duration / steps.length;
+
+  // Timer logic
+  const startTimer = useCallback(() => {
+    if (timerRef.current) return;
+    startTimeRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      const total = elapsedBeforePause.current + (Date.now() - startTimeRef.current) / 1000;
+      setElapsed(total);
+      const stepIndex = Math.min(Math.floor(total / stepDuration), steps.length - 1);
+      setCurrentStep(stepIndex);
+    }, 100);
+  }, [stepDuration, steps.length]);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => stopTimer();
+  }, [stopTimer]);
+
+  const handleStart = () => {
+    setPhase('brewing');
+    setPaused(false);
+    elapsedBeforePause.current = 0;
+    startTimer();
+  };
+
+  const handlePause = () => {
+    if (paused) {
+      setPaused(false);
+      elapsedBeforePause.current = elapsed;
+      startTimer();
+    } else {
+      setPaused(true);
+      stopTimer();
+      elapsedBeforePause.current = elapsed;
+    }
+  };
+
+  const handleFinish = () => {
+    stopTimer();
+    setPhase('done');
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        recipeTitle: recipe.recipeTitle,
+        recipeSlug: recipe.recipe_slug,
+        params: {
+          coffeeWeight: params.coffeeWeight,
+          waterAmount: params.waterAmount,
+          temperature: params.temperature,
+          duration: params.duration,
+          grindSetting: params.grindSetting || recipe.grindLevel || '',
+        },
+        steps,
+        elapsedSeconds: Math.round(elapsed),
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+        notes: '',
+        rating: 0,
+      };
+
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Save failed');
+
+      const saved = await res.json();
+      setSaveResult(saved);
+      if (onSaved) onSaved();
+    } catch (err) {
+      setSaveResult({ error: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateParam = (key, val) => {
+    setParams(prev => ({ ...prev, [key]: val }));
+  };
+
+  return (
+    <div className="detail-overlay" onClick={onClose} style={{ zIndex: 250 }}>
+      <div className="detail-panel brew-panel" onClick={e => e.stopPropagation()} style={{ maxHeight: '92vh' }}>
+        <button className="close-btn" onClick={onClose}>✕</button>
+
+        {/* ===== CONFIG PHASE ===== */}
+        {phase === 'config' && (
+          <>
+            <div className="detail-header" style={{ padding: '24px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', paddingRight: '32px' }}>
+                ☕ {recipe.recipeTitle}
+              </h2>
+              <p style={{ opacity: 0.7, fontSize: '13px', marginTop: '4px' }}>Adjust your brew parameters</p>
+            </div>
+            <div className="detail-body">
+              <div className="brew-params-grid">
+                <div className="brew-param-item">
+                  <label>Coffee (g)</label>
+                  <input type="number" step="0.5" value={params.coffeeWeight} onChange={e => updateParam('coffeeWeight', parseFloat(e.target.value) || 0)} />
+                </div>
+                <div className="brew-param-item">
+                  <label>Water (ml)</label>
+                  <input type="number" step="5" value={params.waterAmount} onChange={e => updateParam('waterAmount', parseFloat(e.target.value) || 0)} />
+                </div>
+                <div className="brew-param-item">
+                  <label>Temp (°C)</label>
+                  <input type="number" step="1" value={params.temperature} onChange={e => updateParam('temperature', parseFloat(e.target.value) || 0)} />
+                </div>
+                <div className="brew-param-item">
+                  <label>Time (s)</label>
+                  <input type="number" step="5" value={params.duration} onChange={e => updateParam('duration', parseFloat(e.target.value) || 0)} />
+                </div>
+                <div className="brew-param-item brew-param-full">
+                  <label>Grind setting</label>
+                  <input type="text" placeholder={recipe.grindLevel || 'e.g. Ode 3.5'} value={params.grindSetting} onChange={e => updateParam('grindSetting', e.target.value)} />
+                </div>
+              </div>
+              <div className="brew-ratio-display">
+                Ratio: <strong>1:{params.waterAmount && params.coffeeWeight ? (params.waterAmount / params.coffeeWeight).toFixed(1) : '?'}</strong>
+              </div>
+              <button className="brew-start-btn" onClick={handleStart}>
+                ▶ Start Brew
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ===== BREWING PHASE ===== */}
+        {phase === 'brewing' && (
+          <>
+            <div className="detail-header" style={{ padding: '20px 24px' }}>
+              <div className="brew-timer-display">{formatTime(Math.floor(elapsed))}</div>
+              <div className="brew-timer-label">
+                step {currentStep + 1} / {steps.length}
+              </div>
+              <div className="brew-progress-track">
+                <div className="brew-progress-fill" style={{ width: `${Math.min((elapsed / params.duration) * 100, 100)}%` }} />
+              </div>
+            </div>
+            <div className="detail-body brew-body">
+              <div className="brew-current-step">
+                <span className="brew-step-num">{currentStep + 1}</span>
+                <span className="brew-step-text">{steps[currentStep]}</span>
+              </div>
+              <div className="brew-step-list">
+                {steps.map((step, i) => (
+                  <div key={i} className={`brew-step-item ${i < currentStep ? 'done' : ''} ${i === currentStep ? 'active' : ''}`}>
+                    <span className="brew-step-dot">{i < currentStep ? '✓' : i + 1}</span>
+                    <span className="brew-step-label">{step}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="brew-actions">
+                <button className="brew-pause-btn" onClick={handlePause}>
+                  {paused ? '▶ Resume' : '⏸ Pause'}
+                </button>
+                <button className="brew-finish-btn" onClick={handleFinish}>
+                  ✅ Finish Brew
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ===== DONE PHASE ===== */}
+        {phase === 'done' && (
+          <>
+            <div className="detail-header" style={{ padding: '24px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px' }}>✅ Brew Complete!</h2>
+              <p style={{ opacity: 0.7, fontSize: '13px', marginTop: '4px' }}>
+                {recipe.recipeTitle} · {formatTime(Math.floor(elapsed))}
+              </p>
+            </div>
+            <div className="detail-body">
+              <div className="brew-summary">
+                <div className="brew-summary-item"><strong>{params.coffeeWeight}g</strong> coffee</div>
+                <div className="brew-summary-item"><strong>{params.waterAmount}ml</strong> water</div>
+                <div className="brew-summary-item"><strong>{params.temperature}°C</strong></div>
+                <div className="brew-summary-item"><strong>{steps.length}</strong> steps</div>
+              </div>
+              {saveResult && !saveResult.error && (
+                <div className="brew-save-success">✅ Saved to history!</div>
+              )}
+              {saveResult && saveResult.error && (
+                <div className="brew-save-error">❌ Save failed: {saveResult.error}</div>
+              )}
+              <div className="brew-done-actions">
+                <button className="brew-start-btn" onClick={handleSave} disabled={saving || (saveResult && !saveResult.error)}>
+                  {saving ? 'Saving...' : '💾 Save to History'}
+                </button>
+                <button className="brew-close-btn" onClick={onClose}>Close</button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
