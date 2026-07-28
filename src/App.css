@@ -1510,9 +1510,13 @@ body {
   color: var(--color-text);
 }
 
-/* ========== History Page ========== */
-.history-panel .detail-body {
-  padding: 16px 20px 24px;
+/* ========== History Page (Inline) ========== */
+.history-page {
+  margin-top: 4px;
+}
+
+.history-page .results-info {
+  margin-bottom: 16px;
 }
 
 .history-loading {

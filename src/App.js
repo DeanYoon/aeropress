@@ -437,7 +437,9 @@ function App() {
       </nav>
       
       <main className="app-main">
-        {filteredRecipes.length === 0 ? (
+        {showHistory ? (
+          <HistoryPage />
+        ) : filteredRecipes.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">🔍</span>
             <p>No recipes found</p>
@@ -464,10 +466,6 @@ function App() {
           </>
         )}
       </main>
-      
-      {showHistory && (
-        <HistoryPage onClose={() => setShowHistory(false)} />
-      )}
       
       {selectedRecipe && (
         <RecipeDetail

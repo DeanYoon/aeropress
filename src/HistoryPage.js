@@ -24,7 +24,7 @@ function StarRating({ value, onChange }) {
   );
 }
 
-export default function HistoryPage({ onClose }) {
+export default function HistoryPage() {
   const [brews, setBrews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -85,88 +85,77 @@ export default function HistoryPage({ onClose }) {
   };
 
   return (
-    <div className="detail-overlay" onClick={onClose} style={{ zIndex: 250 }}>
-      <div className="detail-panel history-panel" onClick={e => e.stopPropagation()} style={{ maxHeight: '92vh' }}>
-        <button className="close-btn" onClick={onClose}>✕</button>
-
-        <div className="detail-header" style={{ padding: '24px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', paddingRight: '32px' }}>
-            📋 Brew History
-          </h2>
-          <p style={{ opacity: 0.7, fontSize: '13px', marginTop: '4px' }}>
-            {loading ? 'Loading...' : `${brews.length} brews recorded`}
-          </p>
+    <div className="history-page">
+      <div className="results-info history-page-info">
+        📋 {loading ? 'Loading...' : `${brews.length} brews recorded`}
+      </div>
+      
+      {loading ? (
+        <div className="history-loading">Loading...</div>
+      ) : brews.length === 0 ? (
+        <div className="history-empty">
+          <p>No brews yet.</p>
+          <p className="empty-hint">Start a brew from any recipe!</p>
         </div>
+      ) : (
+        <div className="history-list">
+          {brews.map(brew => {
+            const isOpen = selectedId === brew._id;
+            return (
+              <div key={brew._id} className={`history-card ${isOpen ? 'open' : ''}`}>
+                <div className="history-card-header" onClick={() => setSelectedId(isOpen ? null : brew._id)}>
+                  <div className="history-card-info">
+                    <span className="history-card-title">{brew.recipeTitle}</span>
+                    <span className="history-card-date">{formatDate(brew.completedAt || brew.createdAt)}</span>
+                  </div>
+                  <div className="history-card-meta">
+                    {brew.rating > 0 && <span className="history-rating-badge">{'★'.repeat(brew.rating)}</span>}
+                    <span className="history-toggle">{isOpen ? '▲' : '▼'}</span>
+                  </div>
+                </div>
 
-        <div className="detail-body">
-          {loading ? (
-            <div className="history-loading">Loading...</div>
-          ) : brews.length === 0 ? (
-            <div className="history-empty">
-              <p>No brews yet.</p>
-              <p className="empty-hint">Start a brew from any recipe!</p>
-            </div>
-          ) : (
-            <div className="history-list">
-              {brews.map(brew => {
-                const isOpen = selectedId === brew._id;
-                return (
-                  <div key={brew._id} className={`history-card ${isOpen ? 'open' : ''}`}>
-                    <div className="history-card-header" onClick={() => setSelectedId(isOpen ? null : brew._id)}>
-                      <div className="history-card-info">
-                        <span className="history-card-title">{brew.recipeTitle}</span>
-                        <span className="history-card-date">{formatDate(brew.completedAt || brew.createdAt)}</span>
-                      </div>
-                      <div className="history-card-meta">
-                        {brew.rating > 0 && <span className="history-rating-badge">{'★'.repeat(brew.rating)}</span>}
-                        <span className="history-toggle">{isOpen ? '▲' : '▼'}</span>
-                      </div>
+                {isOpen && (
+                  <div className="history-card-body">
+                    <div className="history-params">
+                      <span>{brew.params?.coffeeWeight}g</span>
+                      <span>{brew.params?.waterAmount}ml</span>
+                      <span>{brew.params?.temperature}°C</span>
+                      <span>{brew.params?.duration}s</span>
+                      {brew.params?.grindSetting && <span>{brew.params.grindSetting}</span>}
                     </div>
 
-                    {isOpen && (
-                      <div className="history-card-body">
-                        <div className="history-params">
-                          <span>{brew.params?.coffeeWeight}g</span>
-                          <span>{brew.params?.waterAmount}ml</span>
-                          <span>{brew.params?.temperature}°C</span>
-                          <span>{brew.params?.duration}s</span>
-                          {brew.params?.grindSetting && <span>{brew.params.grindSetting}</span>}
-                        </div>
+                    <div className="history-rating-section">
+                      <label>Your Rating</label>
+                      <StarRating value={brew.rating || 0} onChange={v => handleRating(brew._id, v)} />
+                    </div>
 
-                        <div className="history-rating-section">
-                          <label>Your Rating</label>
-                          <StarRating value={brew.rating || 0} onChange={v => handleRating(brew._id, v)} />
-                        </div>
+                    <div className="history-notes-section">
+                      <label>Notes</label>
+                      <textarea
+                        className="history-notes-input"
+                        placeholder="How was it? Any adjustments?"
+                        value={editingNotes[brew._id] !== undefined ? editingNotes[brew._id] : (brew.notes || '')}
+                        onChange={e => setEditingNotes(prev => ({ ...prev, [brew._id]: e.target.value }))}
+                      />
+                      <button
+                        className="history-save-notes-btn"
+                        onClick={() => handleSaveNotes(brew._id)}
+                        disabled={editingNotes[brew._id] === undefined}
+                      >
+                        Save Notes
+                      </button>
+                    </div>
 
-                        <div className="history-notes-section">
-                          <label>Notes</label>
-                          <textarea
-                            className="history-notes-input"
-                            placeholder="How was it? Any adjustments?"
-                            value={editingNotes[brew._id] !== undefined ? editingNotes[brew._id] : (brew.notes || '')}
-                            onChange={e => setEditingNotes(prev => ({ ...prev, [brew._id]: e.target.value }))}
-                          />
-                          <button
-                            className="history-save-notes-btn"
-                            onClick={() => handleSaveNotes(brew._id)}
-                            disabled={editingNotes[brew._id] === undefined}
-                          >
-                            Save Notes
-                          </button>
-                        </div>
-
-                        <button className="history-delete-btn" onClick={() => handleDelete(brew._id)}>
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                    <button className="history-delete-btn" onClick={() => handleDelete(brew._id)}>
+                      Delete
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }
