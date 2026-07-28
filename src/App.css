@@ -454,6 +454,7 @@ body {
   max-width: 640px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   animation: slideUp 0.3s ease;
   position: relative;
 }
@@ -1072,6 +1073,24 @@ body {
   padding: 20px 24px 28px;
 }
 
+@media (max-width: 380px) {
+  .brew-panel .detail-body {
+    padding: 16px 14px 24px;
+  }
+
+  .brew-params-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brew-step-nav {
+    flex-direction: column;
+  }
+
+  .brew-actions {
+    flex-direction: column;
+  }
+}
+
 .brew-params-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1165,6 +1184,12 @@ body {
   color: white;
 }
 
+@media (max-width: 380px) {
+  .brew-timer-display {
+    font-size: 36px;
+  }
+}
+
 .brew-timer-label {
   text-align: center;
   font-size: 13px;
@@ -1225,6 +1250,8 @@ body {
   color: var(--color-primary);
   padding-top: 4px;
   font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .brew-step-list {
@@ -1273,9 +1300,66 @@ body {
   color: var(--color-text-secondary);
 }
 
+.brew-step-label {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
 .brew-step-item.active .brew-step-dot {
   background: var(--color-primary);
   color: white;
+}
+
+/* ========== Brew Step Nav (Manual) ========== */
+.brew-step-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.brew-prev-btn,
+.brew-next-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.brew-prev-btn {
+  background: var(--color-badge-bg);
+  color: var(--color-text-secondary);
+}
+
+.brew-prev-btn:hover:not(:disabled) {
+  background: var(--color-tag-bg);
+  color: var(--color-primary);
+}
+
+.brew-prev-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.brew-next-btn {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: white;
+}
+
+.brew-next-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.brew-next-last {
+  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
 }
 
 .brew-actions {

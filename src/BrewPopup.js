@@ -40,19 +40,15 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
         'Dilute & enjoy!',
       ];
 
-  const stepDuration = params.duration / steps.length;
-
-  // Timer logic
+  // Timer logic (count-up only, no auto-step-advance)
   const startTimer = useCallback(() => {
     if (timerRef.current) return;
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       const total = elapsedBeforePause.current + (Date.now() - startTimeRef.current) / 1000;
       setElapsed(total);
-      const stepIndex = Math.min(Math.floor(total / stepDuration), steps.length - 1);
-      setCurrentStep(stepIndex);
     }, 100);
-  }, [stepDuration, steps.length]);
+  }, []);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -68,6 +64,7 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
   const handleStart = () => {
     setPhase('brewing');
     setPaused(false);
+    setCurrentStep(0);
     elapsedBeforePause.current = 0;
     startTimer();
   };
@@ -81,6 +78,18 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
       setPaused(true);
       stopTimer();
       elapsedBeforePause.current = elapsed;
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
     }
   };
 
@@ -131,6 +140,8 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
   const updateParam = (key, val) => {
     setParams(prev => ({ ...prev, [key]: val }));
   };
+
+  const isLastStep = currentStep >= steps.length - 1;
 
   return (
     <div className="detail-overlay" onClick={onClose} style={{ zIndex: 250 }}>
@@ -192,18 +203,42 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
               </div>
             </div>
             <div className="detail-body brew-body">
+              {/* Current step card */}
               <div className="brew-current-step">
                 <span className="brew-step-num">{currentStep + 1}</span>
                 <span className="brew-step-text">{steps[currentStep]}</span>
               </div>
+
+              {/* Step navigation */}
+              <div className="brew-step-nav">
+                <button
+                  className="brew-prev-btn"
+                  onClick={handlePrevStep}
+                  disabled={currentStep === 0}
+                >
+                  ◀ Prev
+                </button>
+                {isLastStep ? (
+                  <button className="brew-next-btn brew-next-last" onClick={handleFinish}>
+                    ✅ Finish
+                  </button>
+                ) : (
+                  <button className="brew-next-btn" onClick={handleNextStep}>
+                    Next ▶
+                  </button>
+                )}
+              </div>
+
+              {/* Step list */}
               <div className="brew-step-list">
                 {steps.map((step, i) => (
                   <div key={i} className={`brew-step-item ${i < currentStep ? 'done' : ''} ${i === currentStep ? 'active' : ''}`}>
                     <span className="brew-step-dot">{i < currentStep ? '✓' : i + 1}</span>
                     <span className="brew-step-label">{step}</span>
-                  </div>
-                ))}
-              </div>
+                                      </div>
+                                    ))}
+                                  </div>
+              {/* Actions */}
               <div className="brew-actions">
                 <button className="brew-pause-btn" onClick={handlePause}>
                   {paused ? '▶ Resume' : '⏸ Pause'}
