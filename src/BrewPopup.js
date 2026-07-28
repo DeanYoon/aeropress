@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const API_BASE = '/api/brews';
 
@@ -8,13 +8,22 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function BrewPopup({ recipe, onClose, onSaved }) {
+export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [] }) {
   const [phase, setPhase] = useState('config'); // config | brewing | done
   const [elapsed, setElapsed] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState(null);
+  const [isCustomGrind, setIsCustomGrind] = useState(false);
+
+  // Auto-detect if initial grindSetting is custom (not in list)
+  useEffect(() => {
+    if (params.grindSetting && !allGrindLevels.includes(params.grindSetting)) {
+      setIsCustomGrind(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // only on mount
 
   // Editable params
   const [params, setParams] = useState({
@@ -142,6 +151,20 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
   };
 
   const isLastStep = currentStep >= steps.length - 1;
+  
+  // Check if current grindSetting exists in allGrindLevels
+  const grindInList = useMemo(() => {
+    return !isCustomGrind && allGrindLevels.includes(params.grindSetting);
+  }, [allGrindLevels, params.grindSetting, isCustomGrind]);
+
+  const handleGrindSelect = (value) => {
+    if (value === '__custom__') {
+      setIsCustomGrind(true);
+    } else {
+      setIsCustomGrind(false);
+      updateParam('grindSetting', value);
+    }
+  };
 
   return (
     <div className="detail-overlay" onClick={onClose} style={{ zIndex: 250 }}>
@@ -177,7 +200,27 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
                 </div>
                 <div className="brew-param-item brew-param-full">
                   <label>Grind setting</label>
-                  <input type="text" placeholder={recipe.grindLevel || 'e.g. Ode 3.5'} value={params.grindSetting} onChange={e => updateParam('grindSetting', e.target.value)} />
+                  <select
+                    className={`brew-grind-select ${!grindInList && params.grindSetting ? 'brew-grind-custom' : ''}`}
+                    value={params.grindSetting && (grindInList || isCustomGrind) ? (isCustomGrind ? '__custom__' : params.grindSetting) : ''}
+                    onChange={e => handleGrindSelect(e.target.value)}
+                  >
+                    <option value="" disabled>Select grind level...</option>
+                    {allGrindLevels.map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                    <option value="__custom__">✏️ Custom...</option>
+                  </select>
+                  {isCustomGrind && (
+                    <input
+                      type="text"
+                      className="brew-grind-custom-input"
+                      placeholder="Type your grind setting..."
+                      value={params.grindSetting}
+                      onChange={e => updateParam('grindSetting', e.target.value)}
+                      autoFocus
+                    />
+                  )}
                 </div>
               </div>
               <div className="brew-ratio-display">
