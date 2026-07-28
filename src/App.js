@@ -292,8 +292,23 @@ function App() {
     return Array.from(seen.values());
   });
   
+  // Compute unique filter options from data
+  const filterOptions = useMemo(() => {
+    const tagSet = new Set();
+    const catSet = new Set();
+    recipes.forEach(r => {
+      if (Array.isArray(r.tags)) r.tags.forEach(t => tagSet.add(t));
+      if (Array.isArray(r.category)) r.category.forEach(c => catSet.add(c));
+    });
+    // Keep all unique tags (except Cold — covered by Iced button) + categories
+    const otherOptions = [];
+    tagSet.forEach(t => { if (t !== 'Cold') otherOptions.push({ label: t, value: `tag:${t}` }); });
+    catSet.forEach(c => otherOptions.push({ label: c !== 'From an Enthusiast' ? c : 'Enthusiast', value: `cat:${c}` }));
+    return otherOptions.sort((a, b) => a.label.localeCompare(b.label));
+  }, [recipes]);
+  
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showOdeGuide, setShowOdeGuide] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -302,7 +317,20 @@ function App() {
   
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      if (selectedMethod !== 'all' && r.brewMethod !== selectedMethod) return false;
+      // Tag-based quick filters
+      if (selectedFilter === 'iced') {
+        if (!Array.isArray(r.tags) || !r.tags.includes('Cold')) return false;
+      } else if (selectedFilter === 'latte') {
+        if (!(r.recipeTitle || '').toLowerCase().includes('latte')) return false;
+      } else if (selectedFilter.startsWith('tag:')) {
+        const tag = selectedFilter.slice(4);
+        if (!Array.isArray(r.tags) || !r.tags.includes(tag)) return false;
+      } else if (selectedFilter.startsWith('cat:')) {
+        const cat = selectedFilter.slice(4);
+        const cats = Array.isArray(r.category) ? r.category : [r.category || ''];
+        if (!cats.includes(cat)) return false;
+      }
+      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const title = (r.recipeTitle || '').toLowerCase();
@@ -313,7 +341,7 @@ function App() {
       }
       return true;
     });
-  }, [recipes, searchQuery, selectedMethod]);
+  }, [recipes, searchQuery, selectedFilter]);
   
   useEffect(() => {
     const handleKey = (e) => {
@@ -362,16 +390,31 @@ function App() {
         
         <div className="filter-bar">
           <div className="method-filters">
-            {['all', 'standard', 'inverted'].map(m => (
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'iced', label: '🧊 Iced' },
+              { key: 'latte', label: '🥛 Latte' },
+            ].map(f => (
               <button
-                key={m}
-                className={`filter-btn ${selectedMethod === m ? 'active' : ''}`}
-                onClick={() => setSelectedMethod(m)}
+                key={f.key}
+                className={`filter-btn ${selectedFilter === f.key ? 'active' : ''}`}
+                onClick={() => setSelectedFilter(f.key)}
               >
-                {m === 'all' ? 'All' : m === 'standard' ? '☕ Standard' : '🔄 Inverted'}
+                {f.label}
               </button>
             ))}
           </div>
+          
+          <select
+            className="filter-select"
+            value={selectedFilter.startsWith('tag:') || selectedFilter.startsWith('cat:') ? selectedFilter : ''}
+            onChange={e => setSelectedFilter(e.target.value || 'all')}
+          >
+            <option value="">More...</option>
+            {filterOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
           
           <button className="ode-guide-header-btn" onClick={() => setShowOdeGuide(true)}>⚙️ Ode</button>
         </div>
@@ -399,7 +442,7 @@ function App() {
             <span className="empty-icon">🔍</span>
             <p>No recipes found</p>
             <p className="empty-hint">Try a different search or filter</p>
-            <button className="reset-btn" onClick={() => { setSearchQuery(''); setSelectedMethod('all'); }}>
+            <button className="reset-btn" onClick={() => { setSearchQuery(''); setSelectedFilter('all'); }}>
               Reset Filters
             </button>
           </div>
