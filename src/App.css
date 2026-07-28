@@ -1071,6 +1071,7 @@ body {
 /* ========== Brew Popup ========== */
 .brew-panel .detail-body {
   padding: 20px 24px 28px;
+  min-width: 0;
 }
 
 @media (max-width: 380px) {
@@ -1096,12 +1097,14 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .brew-param-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .brew-param-item label {
@@ -1113,6 +1116,7 @@ body {
 }
 
 .brew-param-item input {
+  width: 100%;
   padding: 10px 12px;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -1123,6 +1127,7 @@ body {
   background: var(--color-bg);
   outline: none;
   transition: var(--transition);
+  min-width: 0;
 }
 
 .brew-param-item input:focus {
@@ -1217,6 +1222,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .brew-current-step {
