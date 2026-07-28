@@ -22,7 +22,7 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
     waterAmount: recipe.waterLevel || recipe.waterAmount || 200,
     temperature: recipe.temperature || 93,
     duration: recipe.duration || 120,
-    grindSetting: '',
+    grindSetting: recipe.grindSetting || '',
   });
 
   const timerRef = useRef(null);

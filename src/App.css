@@ -1688,14 +1688,40 @@ body {
   cursor: not-allowed;
 }
 
+.history-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.history-rebrew-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+  color: white;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.history-rebrew-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
 .history-delete-btn {
-  padding: 6px 14px;
+  padding: 10px 16px;
   border: 1px solid #E84A5F;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: transparent;
   color: #E84A5F;
-  font-size: 12px;
+  font-size: 13px;
   font-family: var(--font-sans);
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }

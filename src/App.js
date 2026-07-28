@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import recipesData from './data/recipes.json';
 import BrewPopup from './BrewPopup';
 import HistoryPage from './HistoryPage';
@@ -314,6 +314,21 @@ function App() {
   const [brewRecipe, setBrewRecipe] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   
+  const handleRebrew = useCallback((brew) => {
+    // Build a recipe-like object from history brew data
+    const rebrewRecipe = {
+      recipeTitle: brew.recipeTitle,
+      recipe_slug: brew.recipeSlug,
+      weight: brew.params?.coffeeWeight,
+      waterLevel: brew.params?.waterAmount,
+      temperature: brew.params?.temperature,
+      duration: brew.params?.duration,
+      grindSetting: brew.params?.grindSetting || '',
+      steps: brew.steps || [],
+    };
+    setBrewRecipe(rebrewRecipe);
+  }, []);
+  
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
       // Tag-based quick filters
@@ -422,7 +437,7 @@ function App() {
       
       <main className="app-main">
         {showHistory ? (
-          <HistoryPage />
+          <HistoryPage onRebrew={handleRebrew} />
         ) : filteredRecipes.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">🔍</span>

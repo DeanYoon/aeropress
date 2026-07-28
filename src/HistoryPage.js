@@ -24,7 +24,7 @@ function StarRating({ value, onChange }) {
   );
 }
 
-export default function HistoryPage() {
+export default function HistoryPage({ onRebrew }) {
   const [brews, setBrews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -146,9 +146,14 @@ export default function HistoryPage() {
                       </button>
                     </div>
 
-                    <button className="history-delete-btn" onClick={() => handleDelete(brew._id)}>
-                      Delete
-                    </button>
+                    <div className="history-actions-row">
+                      <button className="history-rebrew-btn" onClick={() => onRebrew?.(brew)}>
+                        🔄 Rebrowse
+                      </button>
+                      <button className="history-delete-btn" onClick={() => handleDelete(brew._id)}>
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
