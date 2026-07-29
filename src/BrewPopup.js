@@ -241,12 +241,6 @@ export default function BrewPopup({ recipe, onClose, onSaved }) {
           <>
             <div className="detail-header" style={{ padding: '20px 24px' }}>
               <div className="brew-timer-display">{formatTime(Math.floor(elapsed))}</div>
-              <div className="brew-timer-label">
-                step {currentStep + 1} / {steps.length}
-              </div>
-              <div className="brew-progress-track">
-                <div className="brew-progress-fill" style={{ width: `${Math.min((elapsed / params.duration) * 100, 100)}%` }} />
-              </div>
             </div>
             <div className="detail-body brew-body">
               {/* Current step card */}
