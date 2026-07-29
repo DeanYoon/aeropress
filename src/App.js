@@ -5,47 +5,34 @@ import HistoryPage from './HistoryPage';
 import './App.css';
 
 // ========== Fellow Ode Gen 2 Conversion ==========
+// Ode dial: 1 ~ 11, 0.3 steps (1, 1.3, 1.6, 2, 2.3, ... 11)
 
-const ODE_RANGES = [
-  { label: 'Espresso (에스프레소)', ode: '1 ~ 2', min: 1, max: 7, keywords: ['espresso', 'powder', 'espresso-fine'] },
-  { label: 'Fine (V60/AeroPress fine)', ode: '3 ~ 3.1', min: 8, max: 12, keywords: ['like sand', 'table salt', 'very fine'] },
-  { label: 'Medium-Fine', ode: '3.1 ~ 4', min: 13, max: 16, keywords: ['medium-fine', 'medium fine', 'finer end of medium'] },
-  { label: 'Medium', ode: '4 ~ 5', min: 17, max: 22, keywords: ['medium', 'standard'] },
-  { label: 'Medium-Coarse', ode: '5 ~ 6', min: 23, max: 28, keywords: ['medium-coarse', 'medium coarse', 'medium - coarse'] },
-  { label: 'Coarse', ode: '6 ~ 7', min: 29, max: 40, keywords: ['coarse', 'french press', 'very coarse'] },
+const ODE_MAP = [
+  { label: 'Fine',          range: '1 ~ 2.3',   low: 1,   high: 2.3, keywords: ['espresso', 'powder', 'sand', 'salt', 'very fine', 'fine'] },
+  { label: 'Medium Fine',   range: '2.3 ~ 4.6', low: 2.3, high: 4.6, keywords: ['medium-fine', 'medium fine', 'finer end'] },
+  { label: 'Medium',        range: '4.6 ~ 7',   low: 4.6, high: 7,   keywords: ['medium'] },
+  { label: 'Medium Coarse', range: '7 ~ 9.3',   low: 7,   high: 9.3, keywords: ['medium-coarse', 'medium coarse'] },
+  { label: 'Coarse',        range: '9.3 ~ 11',  low: 9.3, high: 11,  keywords: ['coarse', 'french', 'cold brew'] },
 ];
 
-function getOdeSetting(grindLevel, clicks) {
-  if (clicks) {
-    const c = parseInt(clicks, 10);
-    if (!isNaN(c)) {
-      for (const range of ODE_RANGES) {
-        if (c >= range.min && c <= range.max) return range.ode;
-      }
-      if (c < 8) return '2.1 ~ 3';
-      if (c > 40) return '7 ~ 8';
-    }
-  }
-  if (grindLevel) {
-    const gl = grindLevel.toLowerCase();
-    if (gl.includes('espresso') || gl.includes('powder')) return '1 ~ 2';
-    if (gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) return '3 ~ 3.1';
-    if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) return '3.1 ~ 4';
-    if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) return '5 ~ 6';
-    if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) return '6 ~ 7';
-    if (gl.includes('medium')) return '4 ~ 5';
-    if (gl.includes('fine')) return '3.1 ~ 4';
-  }
+function getOdeSetting(grindLevel) {
+  if (!grindLevel) return null;
+  const gl = grindLevel.toLowerCase();
+  // Medium-Coarse must be checked before plain Medium to avoid false match
+  if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) return '7 ~ 9.3';
+  if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) return '2.3 ~ 4.6';
+  if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) return '9.3 ~ 11';
+  if (gl.includes('medium')) return '4.6 ~ 7';
+  if (gl.includes('espresso') || gl.includes('powder') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine') || gl.includes('fine')) return '1 ~ 2.3';
   return null;
 }
 
 const FULL_CONVERSION = [
-  { grind: 'Espresso', clicks: '1-7', comandante: '1-9', ode: '1 ~ 2', desc: 'AeroPress Espresso, Flat White, Prismo' },
-  { grind: 'Fine (V60/AeroPress fine) ⭐', clicks: '8-12', comandante: '10-12', ode: '3 ~ 3.1', desc: 'AeroPress Fine, V60 Style' },
-  { grind: 'Medium-Fine ⭐', clicks: '13-16', comandante: '13-16', ode: '3.1 ~ 4', desc: 'James Hoffmann, Jonathan Gagné' },
-  { grind: 'Medium', clicks: '17-22', comandante: '17-20', ode: '4 ~ 5', desc: 'Tim Wendelboe, 일반 스탠다드' },
-  { grind: 'Medium-Coarse', clicks: '23-28', comandante: '21-25', ode: '5 ~ 6', desc: '인버티드, 바이패스 방식' },
-  { grind: 'Coarse', clicks: '29-35', comandante: '26-30', ode: '6 ~ 7', desc: '13g WAC 챔피언, 콜드브루' },
+  { grind: 'Fine',          ode: '1 ~ 2.3',   micron: '275 ~ 400',  desc: 'AeroPress Fine, Espresso, Flat White' },
+  { grind: 'Medium Fine ⭐',ode: '2.3 ~ 4.6', micron: '400 ~ 600',  desc: 'James Hoffmann, Jonathan Gagné' },
+  { grind: 'Medium',        ode: '4.6 ~ 7',   micron: '600 ~ 800',  desc: 'Tim Wendelboe, 일반 스탠다드' },
+  { grind: 'Medium Coarse', ode: '7 ~ 9.3',   micron: '800 ~ 1000', desc: '인버티드, 바이패스 방식' },
+  { grind: 'Coarse',        ode: '9.3 ~ 11',  micron: '1000 ~ 1150',desc: '13g WAC 챔피언, 콜드브루' },
 ];
 
 // ========== Components ==========
@@ -115,7 +102,7 @@ function RecipeDetail({ recipe, onClose, odeGuideOpen, onBrew }) {
   const isCold = tags?.includes('Cold') || recipe.isCold;
   const methodIcon = brewMethod === 'inverted' ? '🔄' : '☕';
   const description = recipeDescription || recipeDescriptionShort || '';
-  const odeSetting = getOdeSetting(grindLevel, numberOfClicks);
+  const odeSetting = getOdeSetting(grindLevel);
   
   const renderDescription = (text) => {
     if (!text) return null;
@@ -510,7 +497,7 @@ function OdeGuideModalView({ onClose }) {
             ⚙️ Fellow Ode Gen 2 가이드
           </h1>
           <p className="app-subtitle" style={{ opacity: 0.8, fontSize: '13px', marginTop: '4px', color: 'rgba(255,255,255,0.8)' }}>
-            Ode는 1~11 숫자 다이얼. 클릭 시스템이 아닙니다.
+            Ode Gen 2: 1~11 다이얼 (0.3 단위: 1, 1.3, 1.6, 2, 2.3, ...)
           </p>
         </div>
         
@@ -525,9 +512,8 @@ function OdeGuideModalView({ onClose }) {
                     {i === 1 && <span className="ode-most-used">Most Used</span>}
                   </div>
                   <div className="ode-row-details">
-                    <span className="ode-detail-item"><strong>Clicks</strong> {row.clicks}</span>
-                    <span className="ode-detail-item"><strong>Comandante</strong> {row.comandante}</span>
-                    <span className="ode-detail-item ode-setting-value"><strong>Ode</strong> {row.ode}</span>
+                    <span className="ode-detail-item"><strong>Ode</strong> {row.ode}</span>
+                    <span className="ode-detail-item"><strong>입자</strong> {row.micron}㎛</span>
                   </div>
                   <div className="ode-row-desc">{row.desc}</div>
                 </div>
@@ -538,11 +524,12 @@ function OdeGuideModalView({ onClose }) {
           <section className="detail-section">
             <h2 className="section-title">💡 팁</h2>
             <ul className="ode-tips">
-              <li>Ode 1-2는 AeroPress에 너무 <strong>곱습니다</strong> (거의 사용 안 함)</li>
-              <li>Ode 7+는 AeroPress에 너무 <strong>굵습니다</strong> (프렌치프레스 용도)</li>
-              <li>숫자 사이에 <strong>미세 조정</strong> 가능 (예: 3.5)</li>
-              <li><strong>James Hoffmann 레시피</strong>로 시작한다면 → <strong>Ode 3.5</strong>에서 시작</li>
-              <li>각 레시피 상세에 Ode 추천값이 표시됩니다</li>
+              <li>Ode 1~2.3: <strong>Fine</strong> — AeroPress fine, espresso, flat white</li>
+              <li>Ode 2.3~4.6: <strong>Medium Fine</strong> — 가장 많이 쓰는 범위 ⭐</li>
+              <li>Ode 4.6~7: <strong>Medium</strong> — 일반 스탠다드</li>
+              <li>Ode 7~9.3: <strong>Medium Coarse</strong> — 인버티드, 바이패스</li>
+              <li>Ode 9.3~11: <strong>Coarse</strong> — 콜드브루, 프렌치프레스</li>
+              <li>다이얼은 0.3 단위로 조절 가능 (예: 3, 3.3, 3.6, 4)</li>
             </ul>
           </section>
         </div>

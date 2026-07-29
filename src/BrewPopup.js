@@ -2,11 +2,15 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 
 const API_BASE = '/api/brews';
 
-// Fellow Ode Gen 2 values: 1 to 11 in 0.1 increments
-const ODE_VALUES = Array.from({ length: 101 }, (_, i) => {
-  const v = 1 + i * 0.1;
-  return parseFloat(v.toFixed(1));
-});
+// Fellow Ode Gen 2 values: 1 to 11 with .3/.6 steps (1, 1.3, 1.6, 2, 2.3, ... 11)
+const ODE_VALUES = (() => {
+  const vals = [];
+  for (let n = 1; n <= 10; n++) {
+    vals.push(n, parseFloat((n + 0.3).toFixed(1)), parseFloat((n + 0.6).toFixed(1)));
+  }
+  vals.push(11);
+  return vals;
+})();
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -14,20 +18,16 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-// Map a recipe's grindLevel to a starting Ode value
+// Map a recipe's grindLevel to a starting Ode value (lower bound of the range)
 function getOdeStart(grindLevel) {
   if (!grindLevel) return null;
   const gl = grindLevel.toLowerCase();
-  let range;
-  if (gl.includes('espresso') || gl.includes('powder')) range = '1 ~ 2';
-  else if (gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) range = '3 ~ 3.1';
-  else if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) range = '3.1 ~ 4';
-  else if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) range = '5 ~ 6';
-  else if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) range = '6 ~ 7';
-  else if (gl.includes('medium')) range = '4 ~ 5';
-  else if (gl.includes('fine')) range = '3.1 ~ 4';
-  else return null;
-  return parseFloat(range.split('~')[0].trim());
+  if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) return 7;
+  if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) return 2.3;
+  if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) return 9.3;
+  if (gl.includes('medium')) return 4.6;
+  if (gl.includes('espresso') || gl.includes('powder') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine') || gl.includes('fine')) return 1;
+  return null;
 }
 
 export default function BrewPopup({ recipe, onClose, onSaved }) {
