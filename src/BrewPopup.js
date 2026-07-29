@@ -2,28 +2,53 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 
 const API_BASE = '/api/brews';
 
+// Fellow Ode Gen 2 values: 1 to 11 in 0.1 increments
+const ODE_VALUES = Array.from({ length: 101 }, (_, i) => {
+  const v = 1 + i * 0.1;
+  return parseFloat(v.toFixed(1));
+});
+
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [] }) {
+// Map a recipe's grindLevel to a starting Ode value
+function getOdeStart(grindLevel) {
+  if (!grindLevel) return null;
+  const gl = grindLevel.toLowerCase();
+  let range;
+  if (gl.includes('espresso') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) range = '3 ~ 3.1';
+  else if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) range = '3.1 ~ 4';
+  else if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) range = '5 ~ 6';
+  else if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) range = '6 ~ 7';
+  else if (gl.includes('medium')) range = '4 ~ 5';
+  else if (gl.includes('fine')) range = '3.1 ~ 4';
+  else return null;
+  return parseFloat(range.split('~')[0].trim());
+}
+
+export default function BrewPopup({ recipe, onClose, onSaved }) {
   const [phase, setPhase] = useState('config'); // config | brewing | done
   const [elapsed, setElapsed] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState(null);
-  const [isCustomGrind, setIsCustomGrind] = useState(false);
 
-  // Auto-detect if initial grindSetting is custom (not in list)
-  useEffect(() => {
-    if (params.grindSetting && !allGrindLevels.includes(params.grindSetting)) {
-      setIsCustomGrind(true);
+  // Compute default Ode from recipe's grindLevel
+  const defaultOde = useMemo(() => {
+    // First try history grindSetting (from rebrew)
+    if (recipe.grindSetting) {
+      const v = parseFloat(recipe.grindSetting);
+      if (!isNaN(v) && v >= 1 && v <= 11) return v;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // only on mount
+    // Then try recipe's grindLevel → Ode mapping
+    const start = getOdeStart(recipe.grindLevel);
+    if (start) return start;
+    return 4; // default: Medium
+  }, [recipe]);
 
   // Editable params
   const [params, setParams] = useState({
@@ -31,7 +56,7 @@ export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [
     waterAmount: recipe.waterLevel || recipe.waterAmount || 200,
     temperature: recipe.temperature || 93,
     duration: recipe.duration || 120,
-    grindSetting: recipe.grindSetting || '',
+    grindSetting: String(defaultOde),
   });
 
   const timerRef = useRef(null);
@@ -151,20 +176,6 @@ export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [
   };
 
   const isLastStep = currentStep >= steps.length - 1;
-  
-  // Check if current grindSetting exists in allGrindLevels
-  const grindInList = useMemo(() => {
-    return !isCustomGrind && allGrindLevels.includes(params.grindSetting);
-  }, [allGrindLevels, params.grindSetting, isCustomGrind]);
-
-  const handleGrindSelect = (value) => {
-    if (value === '__custom__') {
-      setIsCustomGrind(true);
-    } else {
-      setIsCustomGrind(false);
-      updateParam('grindSetting', value);
-    }
-  };
 
   return (
     <div className="detail-overlay" onClick={onClose} style={{ zIndex: 250 }}>
@@ -199,28 +210,19 @@ export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [
                   <input type="number" step="5" value={params.duration} onChange={e => updateParam('duration', parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="brew-param-item brew-param-full">
-                  <label>Grind setting</label>
+                  <label>Ode Gen 2 setting</label>
                   <select
-                    className={`brew-grind-select ${!grindInList && params.grindSetting ? 'brew-grind-custom' : ''}`}
-                    value={params.grindSetting && (grindInList || isCustomGrind) ? (isCustomGrind ? '__custom__' : params.grindSetting) : ''}
-                    onChange={e => handleGrindSelect(e.target.value)}
+                    className="brew-grind-select"
+                    value={params.grindSetting}
+                    onChange={e => updateParam('grindSetting', e.target.value)}
                   >
-                    <option value="" disabled>Select grind level...</option>
-                    {allGrindLevels.map(g => (
-                      <option key={g} value={g}>{g}</option>
+                    {ODE_VALUES.map(v => (
+                      <option key={v} value={v}>{v}</option>
                     ))}
-                    <option value="__custom__">✏️ Custom...</option>
                   </select>
-                  {isCustomGrind && (
-                    <input
-                      type="text"
-                      className="brew-grind-custom-input"
-                      placeholder="Type your grind setting..."
-                      value={params.grindSetting}
-                      onChange={e => updateParam('grindSetting', e.target.value)}
-                      autoFocus
-                    />
-                  )}
+                  <div className="brew-grind-hint">
+                    Ode 1-11 · {recipe.grindLevel && `Recipe: ${recipe.grindLevel}`}
+                  </div>
                 </div>
               </div>
               <div className="brew-ratio-display">
@@ -278,9 +280,10 @@ export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [
                   <div key={i} className={`brew-step-item ${i < currentStep ? 'done' : ''} ${i === currentStep ? 'active' : ''}`}>
                     <span className="brew-step-dot">{i < currentStep ? '✓' : i + 1}</span>
                     <span className="brew-step-label">{step}</span>
-                                      </div>
-                                    ))}
-                                  </div>
+                  </div>
+                ))}
+              </div>
+
               {/* Actions */}
               <div className="brew-actions">
                 <button className="brew-pause-btn" onClick={handlePause}>
@@ -308,7 +311,7 @@ export default function BrewPopup({ recipe, onClose, onSaved, allGrindLevels = [
                 <div className="brew-summary-item"><strong>{params.coffeeWeight}g</strong> coffee</div>
                 <div className="brew-summary-item"><strong>{params.waterAmount}ml</strong> water</div>
                 <div className="brew-summary-item"><strong>{params.temperature}°C</strong></div>
-                <div className="brew-summary-item"><strong>{steps.length}</strong> steps</div>
+                <div className="brew-summary-item"><strong>Ode {params.grindSetting}</strong></div>
               </div>
               {saveResult && !saveResult.error && (
                 <div className="brew-save-success">✅ Saved to history!</div>

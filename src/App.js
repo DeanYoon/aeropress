@@ -292,25 +292,6 @@ function App() {
     return Array.from(seen.values());
   });
   
-  // All unique grind levels from full data (for BrewPopup dropdown)
-  const allGrindLevels = useMemo(() => {
-    const set = new Set();
-    recipesData.forEach(r => {
-      if (r.grindLevel && r.grindLevel.trim()) set.add(r.grindLevel.trim());
-    });
-    // Sort: common categories first, then alphabetically
-    const priority = ['Fine', 'Medium-Fine', 'Medium', 'Medium-Coarse', 'Coarse'];
-    const sorted = Array.from(set).sort((a, b) => {
-      const ai = priority.findIndex(p => a.toLowerCase().startsWith(p.toLowerCase()));
-      const bi = priority.findIndex(p => b.toLowerCase().startsWith(p.toLowerCase()));
-      if (ai !== -1 && bi !== -1) return ai - bi;
-      if (ai !== -1) return -1;
-      if (bi !== -1) return 1;
-      return a.localeCompare(b);
-    });
-    return sorted;
-  }, []);
-  
   // Compute unique filter options from data
   const filterOptions = useMemo(() => {
     const tagSet = new Set();
@@ -501,7 +482,6 @@ function App() {
       {brewRecipe && (
         <BrewPopup
           recipe={brewRecipe}
-          allGrindLevels={allGrindLevels}
           onClose={() => setBrewRecipe(null)}
           onSaved={() => {}}
         />

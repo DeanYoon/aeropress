@@ -1203,6 +1203,13 @@ body {
   border-color: var(--color-primary);
 }
 
+.brew-grind-hint {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
 .brew-ratio-display {
   text-align: center;
   font-size: 14px;
