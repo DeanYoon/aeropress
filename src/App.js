@@ -7,7 +7,8 @@ import './App.css';
 // ========== Fellow Ode Gen 2 Conversion ==========
 
 const ODE_RANGES = [
-  { label: 'Fine (에스프레소급)', ode: '3 ~ 3.1', min: 8, max: 12, keywords: ['espresso', 'like sand', 'table salt', 'very fine'] },
+  { label: 'Espresso (에스프레소)', ode: '1 ~ 2', min: 1, max: 7, keywords: ['espresso', 'powder', 'espresso-fine'] },
+  { label: 'Fine (V60/AeroPress fine)', ode: '3 ~ 3.1', min: 8, max: 12, keywords: ['like sand', 'table salt', 'very fine'] },
   { label: 'Medium-Fine', ode: '3.1 ~ 4', min: 13, max: 16, keywords: ['medium-fine', 'medium fine', 'finer end of medium'] },
   { label: 'Medium', ode: '4 ~ 5', min: 17, max: 22, keywords: ['medium', 'standard'] },
   { label: 'Medium-Coarse', ode: '5 ~ 6', min: 23, max: 28, keywords: ['medium-coarse', 'medium coarse', 'medium - coarse'] },
@@ -27,7 +28,8 @@ function getOdeSetting(grindLevel, clicks) {
   }
   if (grindLevel) {
     const gl = grindLevel.toLowerCase();
-    if (gl.includes('espresso') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) return '3 ~ 3.1';
+    if (gl.includes('espresso') || gl.includes('powder')) return '1 ~ 2';
+    if (gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) return '3 ~ 3.1';
     if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) return '3.1 ~ 4';
     if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) return '5 ~ 6';
     if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) return '6 ~ 7';
@@ -38,7 +40,8 @@ function getOdeSetting(grindLevel, clicks) {
 }
 
 const FULL_CONVERSION = [
-  { grind: 'Fine (에스프레소 급)', clicks: '8-12', comandante: '10-12', ode: '3 ~ 3.1', desc: 'AeroPress Espresso, V60 Style' },
+  { grind: 'Espresso', clicks: '1-7', comandante: '1-9', ode: '1 ~ 2', desc: 'AeroPress Espresso, Flat White, Prismo' },
+  { grind: 'Fine (V60/AeroPress fine) ⭐', clicks: '8-12', comandante: '10-12', ode: '3 ~ 3.1', desc: 'AeroPress Fine, V60 Style' },
   { grind: 'Medium-Fine ⭐', clicks: '13-16', comandante: '13-16', ode: '3.1 ~ 4', desc: 'James Hoffmann, Jonathan Gagné' },
   { grind: 'Medium', clicks: '17-22', comandante: '17-20', ode: '4 ~ 5', desc: 'Tim Wendelboe, 일반 스탠다드' },
   { grind: 'Medium-Coarse', clicks: '23-28', comandante: '21-25', ode: '5 ~ 6', desc: '인버티드, 바이패스 방식' },

@@ -19,7 +19,8 @@ function getOdeStart(grindLevel) {
   if (!grindLevel) return null;
   const gl = grindLevel.toLowerCase();
   let range;
-  if (gl.includes('espresso') || gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) range = '3 ~ 3.1';
+  if (gl.includes('espresso') || gl.includes('powder')) range = '1 ~ 2';
+  else if (gl.includes('sand') || gl.includes('salt') || gl.includes('very fine')) range = '3 ~ 3.1';
   else if (gl.includes('medium-fine') || gl.includes('medium fine') || gl.includes('finer end')) range = '3.1 ~ 4';
   else if (gl.includes('medium') && (gl.includes('coarse') || gl.includes('corse') || gl.includes('course'))) range = '5 ~ 6';
   else if (gl.includes('coarse') || gl.includes('french') || gl.includes('cold brew')) range = '6 ~ 7';
