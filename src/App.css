@@ -1785,3 +1785,62 @@ body {
   background: #E84A5F;
   color: white;
 }
+
+/* === Editable Param Inputs === */
+.history-param-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.history-param-input-group label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.history-param-input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.history-param-input {
+  width: 64px;
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  text-align: center;
+  outline: none;
+  transition: var(--transition);
+}
+.history-param-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.15);
+}
+.history-param-input-row span {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+.history-save-params-row {
+  margin-bottom: 12px;
+}
+.history-save-btn {
+  padding: 6px 14px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.history-save-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

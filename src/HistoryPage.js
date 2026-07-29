@@ -29,6 +29,7 @@ export default function HistoryPage({ onRebrew }) {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
   const [editingNotes, setEditingNotes] = useState({});
+  const [editingParams, setEditingParams] = useState({});
 
   const loadHistory = useCallback(async () => {
     try {
@@ -74,6 +75,29 @@ export default function HistoryPage({ onRebrew }) {
     }
   };
 
+  const handleSaveParams = async (id) => {
+    const params = editingParams[id];
+    if (!params) return;
+    try {
+      await fetch(API_BASE, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _id: id, params }),
+      });
+      setBrews(prev => prev.map(b => b._id === id ? { ...b, params } : b));
+      setEditingParams(prev => { const n = { ...prev }; delete n[id]; return n; });
+    } catch (err) {
+      console.error('Save params failed:', err);
+    }
+  };
+
+  const setParam = (id, key, value) => {
+    setEditingParams(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] || {}), [key]: value },
+    }));
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this brew record?')) return;
     try {
@@ -101,9 +125,15 @@ export default function HistoryPage({ onRebrew }) {
         <div className="history-list">
           {brews.map(brew => {
             const isOpen = selectedId === brew._id;
+            const p = brew.params || {};
+            const ep = editingParams[brew._id] || {};
             return (
               <div key={brew._id} className={`history-card ${isOpen ? 'open' : ''}`}>
-                <div className="history-card-header" onClick={() => setSelectedId(isOpen ? null : brew._id)}>
+                <div className="history-card-header" onClick={() => {
+                  setSelectedId(isOpen ? null : brew._id);
+                  setEditingNotes(prev => { const n = { ...prev }; delete n[brew._id]; return n; });
+                  setEditingParams(prev => { const n = { ...prev }; delete n[brew._id]; return n; });
+                }}>
                   <div className="history-card-info">
                     <span className="history-card-title">{brew.recipeTitle}</span>
                     <span className="history-card-date">{formatDate(brew.completedAt || brew.createdAt)}</span>
@@ -117,12 +147,84 @@ export default function HistoryPage({ onRebrew }) {
                 {isOpen && (
                   <div className="history-card-body">
                     <div className="history-params">
-                      <span>{brew.params?.coffeeWeight}g</span>
-                      <span>{brew.params?.waterAmount}ml</span>
-                      <span>{brew.params?.temperature}°C</span>
-                      <span>{brew.params?.duration}s</span>
-                      {brew.params?.grindSetting && <span>{brew.params.grindSetting}</span>}
+                      <div className="history-param-input-group">
+                        <label>Coffee</label>
+                        <div className="history-param-input-row">
+                          <input
+                            className="history-param-input"
+                            type="number"
+                            step="0.1"
+                            value={ep.coffeeWeight !== undefined ? ep.coffeeWeight : (p.coffeeWeight || '')}
+                            onChange={e => setParam(brew._id, 'coffeeWeight', parseFloat(e.target.value) || 0)}
+                          />
+                          <span>g</span>
+                        </div>
+                      </div>
+                      <div className="history-param-input-group">
+                        <label>Water</label>
+                        <div className="history-param-input-row">
+                          <input
+                            className="history-param-input"
+                            type="number"
+                            step="1"
+                            value={ep.waterAmount !== undefined ? ep.waterAmount : (p.waterAmount || '')}
+                            onChange={e => setParam(brew._id, 'waterAmount', parseFloat(e.target.value) || 0)}
+                          />
+                          <span>ml</span>
+                        </div>
+                      </div>
+                      <div className="history-param-input-group">
+                        <label>Temp</label>
+                        <div className="history-param-input-row">
+                          <input
+                            className="history-param-input"
+                            type="number"
+                            step="1"
+                            value={ep.temperature !== undefined ? ep.temperature : (p.temperature || '')}
+                            onChange={e => setParam(brew._id, 'temperature', parseFloat(e.target.value) || 0)}
+                          />
+                          <span>°C</span>
+                        </div>
+                      </div>
+                      <div className="history-param-input-group">
+                        <label>Time</label>
+                        <div className="history-param-input-row">
+                          <input
+                            className="history-param-input"
+                            type="number"
+                            step="5"
+                            value={ep.duration !== undefined ? ep.duration : (p.duration || '')}
+                            onChange={e => setParam(brew._id, 'duration', parseFloat(e.target.value) || 0)}
+                          />
+                          <span>s</span>
+                        </div>
+                      </div>
+                      <div className="history-param-input-group">
+                        <label>Ode</label>
+                        <div className="history-param-input-row">
+                          <input
+                            className="history-param-input"
+                            type="number"
+                            step="0.3"
+                            min="1"
+                            max="11"
+                            value={ep.grindSetting !== undefined ? ep.grindSetting : (p.grindSetting || '')}
+                            onChange={e => setParam(brew._id, 'grindSetting', parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                      </div>
                     </div>
+
+                    {editingParams[brew._id] && (
+                      <div className="history-save-params-row">
+                        <button
+                          className="history-save-btn"
+                          onClick={() => handleSaveParams(brew._id)}
+                        >
+                          💾 Save Params
+                        </button>
+                      </div>
+                    )}
 
                     <div className="history-rating-section">
                       <label>Your Rating</label>
@@ -142,7 +244,7 @@ export default function HistoryPage({ onRebrew }) {
                         onClick={() => handleSaveNotes(brew._id)}
                         disabled={editingNotes[brew._id] === undefined}
                       >
-                        Save Notes
+                        💾 Save Notes
                       </button>
                     </div>
 
