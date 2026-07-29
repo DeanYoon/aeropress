@@ -7,14 +7,6 @@ import './App.css';
 // ========== Fellow Ode Gen 2 Conversion ==========
 // Ode dial: 1 ~ 11, 0.3 steps (1, 1.3, 1.6, 2, 2.3, ... 11)
 
-const ODE_MAP = [
-  { label: 'Fine',          range: '1 ~ 2.3',   low: 1,   high: 2.3, keywords: ['espresso', 'powder', 'sand', 'salt', 'very fine', 'fine'] },
-  { label: 'Medium Fine',   range: '2.3 ~ 4.6', low: 2.3, high: 4.6, keywords: ['medium-fine', 'medium fine', 'finer end'] },
-  { label: 'Medium',        range: '4.6 ~ 7',   low: 4.6, high: 7,   keywords: ['medium'] },
-  { label: 'Medium Coarse', range: '7 ~ 9.3',   low: 7,   high: 9.3, keywords: ['medium-coarse', 'medium coarse'] },
-  { label: 'Coarse',        range: '9.3 ~ 11',  low: 9.3, high: 11,  keywords: ['coarse', 'french', 'cold brew'] },
-];
-
 function getOdeSetting(grindLevel) {
   if (!grindLevel) return null;
   const gl = grindLevel.toLowerCase();
