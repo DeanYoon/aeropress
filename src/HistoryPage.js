@@ -24,7 +24,7 @@ function StarRating({ value, onChange }) {
   );
 }
 
-export default function HistoryPage({ onRebrew }) {
+export default function HistoryPage({ onRebrew, refreshKey = 0 }) {
   const [brews, setBrews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -42,7 +42,7 @@ export default function HistoryPage({ onRebrew }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
 

@@ -295,7 +295,13 @@ function App() {
   const [showOdeGuide, setShowOdeGuide] = useState(false);
   const [brewRecipe, setBrewRecipe] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   
+  const handleSaved = useCallback(() => {
+    setBrewRecipe(null);
+    setHistoryRefreshKey(k => k + 1);
+  }, []);
+
   const handleRebrew = useCallback((brew) => {
     // Build a recipe-like object from history brew data
     const rebrewRecipe = {
@@ -419,7 +425,7 @@ function App() {
       
       <main className="app-main">
         {showHistory ? (
-          <HistoryPage onRebrew={handleRebrew} />
+          <HistoryPage onRebrew={handleRebrew} refreshKey={historyRefreshKey} />
         ) : filteredRecipes.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">🔍</span>
@@ -465,7 +471,7 @@ function App() {
         <BrewPopup
           recipe={brewRecipe}
           onClose={() => setBrewRecipe(null)}
-          onSaved={() => {}}
+          onSaved={handleSaved}
         />
       )}
     </div>
