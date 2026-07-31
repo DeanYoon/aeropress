@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const API_BASE = '/api/brews';
 
@@ -31,7 +31,7 @@ export default function HistoryPage({ onRebrew, refreshKey = 0 }) {
   const [editingNotes, setEditingNotes] = useState({});
   const [editingParams, setEditingParams] = useState({});
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = async () => {
     try {
       const res = await fetch(`${API_BASE}?limit=100`);
       if (!res.ok) throw new Error('Failed to load');
@@ -42,9 +42,9 @@ export default function HistoryPage({ onRebrew, refreshKey = 0 }) {
     } finally {
       setLoading(false);
     }
-  }, [refreshKey]);
+  };
 
-  useEffect(() => { loadHistory(); }, [loadHistory]);
+  useEffect(() => { loadHistory(); }, [refreshKey]);
 
   const handleRating = async (id, rating) => {
     try {
